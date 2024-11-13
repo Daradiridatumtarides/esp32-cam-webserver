@@ -288,6 +288,40 @@ const uint8_t index_ov2640_html[] = R"=====(<!doctype html>
           </div>
         </figure>
       </div>
+      <div id="control">
+       <table>
+      <tr>
+          <td align="center"><button class="button" onmousedown="toggleCheckbox('trackmode');" ontouchstart="toggleCheckbox('trackmode');">Track Mode</button></td>
+          <td align="center"><button class="buttonctrl" onmousedown="toggleCheckbox('leftforward');" ontouchstart="toggleCheckbox('leftforward');">Leftforward</button></td>
+          <td align="center"><button class="buttonctrl" onmousedown="toggleCheckbox('forward');" ontouchstart="toggleCheckbox('forward');">Forward</button></td>
+          <td align="center"><button class="buttonctrl" onmousedown="toggleCheckbox('rightforward');" ontouchstart="toggleCheckbox('rightforward');">Rightforward</button></td>
+      </tr>
+      <tr>
+          <td align="center"><button class="button" onmousedown="toggleCheckbox('avoidmode');" ontouchstart="toggleCheckbox('avoidmode');">Avoid Mode</button></td>
+          <td align="center"><button class="buttonctrl" onmousedown="toggleCheckbox('left');" ontouchstart="toggleCheckbox('left');">Left</button></td>
+          <td align="center"><button class="button" onmousedown="toggleCheckbox('stop');" ontouchstart="toggleCheckbox('stop');">Stop</button></td>
+          <td align="center"><button class="buttonctrl" onmousedown="toggleCheckbox('right');" ontouchstart="toggleCheckbox('right');">Right</button></td>
+      </tr>
+      <tr>
+         <td align="center"><button class="button" onmousedown="toggleCheckbox('followmode');" ontouchstart="toggleCheckbox('followmode');">Follow Mode</button></td>
+         <td align="center"><button class="buttonctrl" onmousedown="toggleCheckbox('leftbackward');" ontouchstart="toggleCheckbox('leftbackward');">Leftbackward</button></td>
+         <td align="center"><button class="buttonctrl" onmousedown="toggleCheckbox('backward');" ontouchstart="toggleCheckbox('backward');">Backward</button></td>
+         <td align="center"><button class="buttonctrl" onmousedown="toggleCheckbox('rightbackward');" ontouchstart="toggleCheckbox('rightbackward');">Rightbackward</button></td>
+      </tr>
+      <tr>
+          <td>
+          <td align="center"><button class="button" onmousedown="toggleCheckbox('camleft');" ontouchstart="toggleCheckbox('camleft');">CamLeft</button></td>
+          <td align="center"><button class="button" onmousedown="toggleCheckbox('camreset');" ontouchstart="toggleCheckbox('camreset');">CamReset</button></td>
+          <td align="center"><button class="button" onmousedown="toggleCheckbox('camright');" ontouchstart="toggleCheckbox('camright');">CamRight</button></td>
+      </tr> 
+      <tr>
+       <td colspan="4" align="left"> 
+       <label for="CmdInput">Command Input:</label>
+       <input type="text" id="CmdInput" size = 75 placeholder="Type command and press Enter (max. 150 char)">
+       </td>
+      </tr>
+    </table>
+      </div>
     </section>
   </body>
 
