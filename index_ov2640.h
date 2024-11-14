@@ -317,7 +317,7 @@ const uint8_t index_ov2640_html[] = R"=====(<!doctype html>
       <tr>
        <td colspan="4" align="left"> 
        <label for="CmdInput">Command Input:</label>
-       <input type="text" id="CmdInput" size = 75 placeholder="Type command and press Enter (max. 150 char)">
+       <input type="text" id="CmdInput" size = 75 placeholder="Type command and press Enter (max. 75 char)">
        </td>
       </tr>
     </table>
@@ -661,6 +661,27 @@ const uint8_t index_ov2640_html[] = R"=====(<!doctype html>
     }
 
   })
+
+  // Event listener for the command input field
+  document.getElementById('CmdInput').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+      const cmdText = event.target.value;
+      var encodedCmdText = encodeURIComponent(cmdText);
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", "/action?go=C" + encodedCmdText, true);
+      xhr.send();
+      // Clear the input field if needed
+      //document.getElementById('CmdInput').value = "";
+      //event.target.value = '';
+    }
+  });
+
+  function toggleCheckbox(x) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "/action?go=" + x, true);
+    xhr.send();
+  }
+
   </script>
 </html>)=====";
 

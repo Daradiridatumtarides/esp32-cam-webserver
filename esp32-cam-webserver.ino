@@ -2,7 +2,7 @@
 // because of the following include
 // and https://forum.arduino.cc/t/error-esp-int-wdt-h/1273368/11
 // Board Manager "esp32" by Espressif Systems must be used 
-// in version 2.017
+// in version 2.0.17
 #include <esp_int_wdt.h>
 #include <esp_task_wdt.h>
 #include <WiFi.h>

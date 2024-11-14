@@ -743,9 +743,161 @@ static esp_err_t index_handler(httpd_req_t *req){
     }
 }
 
+void decodeURIComponent(const char *input, char *output) {
+  char a, b;
+
+  while (*input) {
+    if ((*input == '%') && ((a = input[1]) && (b = input[2])) && (isxdigit(a) && isxdigit(b))) {
+      if (a >= 'a')
+        a -= 'a' - 'A';
+      if (a >= 'A')
+        a -= ('A' - 10);
+      else
+        a -= '0';
+      if (b >= 'a')
+        b -= 'a' - 'A';
+      if (b >= 'A')
+        b -= ('A' - 10);
+      else
+        b -= '0';
+      *output++ = 16 * a + b;
+      input += 3;
+    } else if (*input == '+') {
+      *output++ = ' ';
+      input++;
+    } else {
+      *output++ = *input++;
+    }
+  }
+  *output = '\0';
+}
+
+static esp_err_t car_cmd_handler(httpd_req_t *req) {
+  char *buf;
+  size_t buf_len;
+  // esp_err_t httpProcErr;
+  char variable[150] = {
+      0,
+  };
+  char uriDeCodeVar[150] = {
+      0,
+  };
+
+#ifdef DBG_CMDHDLER
+  Serial.print("req->uri: ");
+  Serial.println(req->uri);
+#endif
+
+  buf_len = httpd_req_get_url_query_len(req) + 1;
+  if (buf_len > 1) {
+    buf = (char *)malloc(buf_len);
+    if (!buf) {
+      httpd_resp_send_500(req);
+      Serial.println("Could not allocate buflen!");
+      return ESP_FAIL;
+    }
+    if (httpd_req_get_url_query_str(req, buf, buf_len) == ESP_OK) {
+      if (httpd_query_key_value(buf, "go", variable, sizeof(variable)) == ESP_OK) {
+      } else {
+        free(buf);
+        httpd_resp_send_404(req);
+        return ESP_FAIL;
+      }
+    } else {
+      free(buf);
+      httpd_resp_send_404(req);
+      return ESP_FAIL;
+    }
+    free(buf);
+  } else {
+    httpd_resp_send_404(req);
+    return ESP_FAIL;
+  }
+
+  int res = 0;
+#ifdef DBG_CMDHDLER
+  Serial.print("Variable is: ");
+  Serial.println(variable);
+#endif
+  // do car movement via CMD 103 - Car Control
+  // spped is set to constantly "slow"
+  if (!strcmp(variable, "leftforward")) {
+    Serial.println("leftforward");
+    Serial2.print("{\"H\":1,\"N\":103,\"D1\":5,\"D2\":70}");
+  } else if (!strcmp(variable, "forward")) {
+    Serial.println("Forward");
+    Serial2.print("{\"H\":1,\"N\":103,\"D1\":1,\"D2\":70}");
+  } else if (!strcmp(variable, "rightforward")) {
+    Serial.println("Rightforward");
+    Serial2.print("{\"H\":1,\"N\":103,\"D1\":7,\"D2\":70}");
+  } else if (!strcmp(variable, "left")) {
+    Serial.println("Left");
+    Serial2.print("{\"H\":1,\"N\":103,\"D1\":3,\"D2\":70}");
+  } else if (!strcmp(variable, "right")) {
+    Serial.println("Right");
+    Serial2.print("{\"H\":1,\"N\":103,\"D1\":4,\"D2\":70}");
+  } else if (!strcmp(variable, "leftbackward")) {
+    Serial.println("LeftBackward");
+    Serial2.print("{\"H\":1,\"N\":103,\"D1\":6,\"D2\":70}");
+  } else if (!strcmp(variable, "backward")) {
+    Serial.println("Backward");
+    Serial2.print("{\"H\":1,\"N\":103,\"D1\":2,\"D2\":70}");
+  } else if (!strcmp(variable, "rightbackward")) {
+    Serial.println("Rightbackward");
+    Serial2.print("{\"H\":1,\"N\":103,\"D1\":8,\"D2\":70}");
+  } else if (!strcmp(variable, "stop")) {
+    Serial.println("Stop");
+    Serial2.print("{\"H\":1,\"N\":103,\"D1\":9,\"D2\":0}");
+  }
+  // do camera Movement via step control
+  // CMD 6
+  else if (!strcmp(variable, "camleft")) {
+    Serial.println("Turn camera left");
+    Serial2.print("{\"H\":1,\"N\":106,\"D1\":3}");
+  } else if (!strcmp(variable, "camreset")) {
+    Serial.println("Center camera");
+    Serial2.print("{\"H\":1,\"N\":106,\"D1\":5}");
+  } else if (!strcmp(variable, "camright")) {
+    Serial.println("Turn camera right");
+    Serial2.print("{\"H\":1,\"N\":106,\"D1\":4}");
+  }
+  // automatic modes
+  else if (!strcmp(variable, "trackmode")) {
+    Serial.println("Switching to track mode!");
+    Serial2.print("{\"H\":1,\"N\":2}");
+  } else if (!strcmp(variable, "avoidmode")) {
+    Serial.println("Switching to avoid mode!");
+    Serial2.print("{\"H\":1,\"N\":3}");
+  } else if (!strcmp(variable, "followmode")) {
+    Serial.println("Switching to follow mode!");
+    Serial2.print("{\"H\":1,\"N\":101,\"D1\":4}");
+  } else if (variable[0] == 'C') { // first letter is C
+#ifdef DBG_CMDHDLER
+    Serial.print("Received command: ");
+    Serial.println(variable);
+#endif
+    // send variable without leading 'C' to Serial 2
+    decodeURIComponent(&(variable[1]), uriDeCodeVar);
+#ifdef DBG_CMDHDLER
+    Serial.print("Command 2 Send:");
+    Serial.println(uriDeCodeVar);
+#endif
+    Serial2.print(uriDeCodeVar);
+  } else {
+    res = -1;
+  }
+
+  if (res) {
+    return httpd_resp_send_500(req);
+  }
+
+  httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+  return httpd_resp_send(req, NULL, 0);
+}
+
 void startCameraServer(int hPort, int sPort){
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-    config.max_uri_handlers = 16; // we use more than the default 8 (on port 80)
+    config.max_uri_handlers = 17; // we use more than the default 8 (on port 80)
 
     httpd_uri_t index_uri = {
         .uri       = "/",
@@ -843,6 +995,12 @@ void startCameraServer(int hPort, int sPort){
         .handler   = error_handler,
         .user_ctx  = NULL
     };
+    httpd_uri_t car_cmd_uri    = {
+      .uri = "/action", 
+      .method = HTTP_GET, 
+      .handler = car_cmd_handler, 
+      .user_ctx = NULL
+    };
 
     // Request Handlers; config.max_uri_handlers (above) must be >= the number of handlers
     config.server_port = hPort;
@@ -856,6 +1014,7 @@ void startCameraServer(int hPort, int sPort){
             httpd_register_uri_handler(camera_httpd, &cmd_uri);
             httpd_register_uri_handler(camera_httpd, &status_uri);
             httpd_register_uri_handler(camera_httpd, &capture_uri);
+            httpd_register_uri_handler(camera_httpd, &car_cmd_uri);
         }
         httpd_register_uri_handler(camera_httpd, &style_uri);
         httpd_register_uri_handler(camera_httpd, &favicon_16x16_uri);
