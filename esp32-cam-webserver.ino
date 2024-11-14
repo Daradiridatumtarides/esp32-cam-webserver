@@ -632,6 +632,10 @@ void WifiSetup() {
     }
 }
 
+// Serial communication via Serial2
+#define RXD2 33
+#define TXD2 4
+
 void setup() {
     Serial.begin(115200);
     Serial.setDebugOutput(true);
@@ -644,6 +648,10 @@ void setup() {
     Serial.print("Base Release: ");
     Serial.println(baseVersion);
     Serial.println();
+
+    // start serial communication via serialport 2 for communication with
+    // motor controller
+    Serial2.begin(115200, SERIAL_8N1, RXD2, TXD2);
 
     // Warn if no PSRAM is detected (typically user error with board selection in the IDE)
     if(!psramFound()){
