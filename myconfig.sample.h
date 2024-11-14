@@ -107,7 +107,7 @@ struct station stationList[] = {{"ssid1", "pass1", true},
  * Over The Air firmware updates can be disabled by uncommenting the folowing line
  * When enabled the device will advertise itself using the MDNS_NAME defined above
  */
-// #define NO_OTA
+#define NO_OTA
 
 /*
  * OTA can be password protected to prevent the device being hijacked
